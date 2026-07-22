@@ -4,6 +4,7 @@
 Architecture: Clean, Modular, Secure, High-Performance
 UI/UX: Neo Cyber Glassmorphism Dashboard
 """
+
 import os
 import sys
 import json
@@ -40,34 +41,86 @@ try:
     BCRYPT_AVAILABLE = True
 except ImportError:
     BCRYPT_AVAILABLE = False
-    # We'll use a simpler hashing with salt for compatibility
 
-# Secret key from environment or generate
+# Flask
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 app.permanent_session_lifetime = timedelta(days=7)
 
-# Admin credentials (hashed)
-ADMIN_USERNAME = "MOUHAMED1234MA"
-ADMIN_PASSWORD = "MOUHAMED1234MA"  # This will be hashed on first run
+# ============================================================================
+# 👤 ADMIN
+# ============================================================================
 
-# Defaults
+ADMIN_USERNAME = "MOUHAMED1234MA"
+ADMIN_PASSWORD = "MOUHAMED1234MA"
+
+# ============================================================================
+# ⚙️ DEFAULT HOSTING SETTINGS
+# ============================================================================
+
 DEFAULT_CPU_LIMIT = 50
 DEFAULT_RAM = "2GB"
 DEFAULT_DISK = "500GB"
 DEFAULT_EXPIRY_DAYS = 30
+
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024
-app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
 
-# Paths
-USERS_FILE = 'users.json'
-BOTS_DIR = 'bots'
-LOGS_DIR = 'logs'
-CONFIG_FILE = 'config.json'
-SECURITY_LOG_FILE = 'security.log'          # 🔐 New: log file for security events
+# ============================================================================
+# 💾 PERSISTENT STORAGE (Fly.io Volume)
+# ============================================================================
 
-os.makedirs(BOTS_DIR, exist_ok=True)
-os.makedirs(LOGS_DIR, exist_ok=True)
+DATA_DIR = "/data"
+
+USERS_FILE = os.path.join(DATA_DIR, "users.json")
+CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
+SECURITY_LOG_FILE = os.path.join(DATA_DIR, "security.log")
+
+BOTS_DIR = os.path.join(DATA_DIR, "bots")
+UPLOADS_DIR = os.path.join(DATA_DIR, "uploads")
+LOGS_DIR = os.path.join(DATA_DIR, "logs")
+DATABASES_DIR = os.path.join(DATA_DIR, "databases")
+SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
+TEMP_DIR = os.path.join(DATA_DIR, "temp")
+BACKUPS_DIR = os.path.join(DATA_DIR, "backups")
+CACHE_DIR = os.path.join(DATA_DIR, "cache")
+FILES_DIR = os.path.join(DATA_DIR, "files")
+
+# Create all required directories automatically
+for directory in [
+    DATA_DIR,
+    BOTS_DIR,
+    UPLOADS_DIR,
+    LOGS_DIR,
+    DATABASES_DIR,
+    SESSIONS_DIR,
+    TEMP_DIR,
+    BACKUPS_DIR,
+    CACHE_DIR,
+    FILES_DIR,
+]:
+    os.makedirs(directory, exist_ok=True)
+
+# Create default JSON files if they don't exist
+DEFAULT_JSON_FILES = {
+    USERS_FILE: {},
+    CONFIG_FILE: {}
+}
+
+for file_path, default_content in DEFAULT_JSON_FILES.items():
+    if not os.path.exists(file_path):
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(default_content, f, indent=4)
+
+# ============================================================================
+# 📂 PROJECT DIRECTORIES
+# ============================================================================
+
+TEMPLATES_DIR = "templates"
+STATIC_DIR = "static"
+
+os.makedirs(TEMPLATES_DIR, exist_ok=True)
+os.makedirs(STATIC_DIR, exist_ok=True)
 
 # ============================================================================
 # 🛡️ SECURITY HELPERS (NEW)
