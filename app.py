@@ -2906,5 +2906,5 @@ if __name__ == '__main__':
     print("✅ Server starting with enhanced security and UI...")
     print("=" * 70)
 
-    port = int(os.environ.get('PORT', 22))
+    port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
